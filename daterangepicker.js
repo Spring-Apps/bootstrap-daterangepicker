@@ -1,5 +1,5 @@
 /**
- * @version: 1.3.13
+ * @version: 1.3.14
  * @author: Dan Grossman http://www.dangrossman.info/
  * @author: Sheperd Chitete sheperd@wird.co.za
  * @date: 2014-08-18
@@ -398,8 +398,8 @@
                 right.removeClass('right').addClass('left');
 
                 if (this.singleDatePicker) {
-                    left.show();
-                    right.hide();
+                    left.hide();
+                    right.show();
                 }
             }
 
