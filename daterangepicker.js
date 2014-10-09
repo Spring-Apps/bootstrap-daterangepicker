@@ -580,6 +580,11 @@
                 target.closest(this.container).length ||
                 target.closest('.calendar-date').length
                 ) return;
+
+            if(!target.hasClass('applyBtn') && !this.singleDatePicker) {
+                this.hideNoModelChanges();
+                return;
+            }
             this.hide();
         },
 
@@ -596,6 +601,24 @@
 
             if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
                 this.notify();
+
+            this.oldStartDate = this.startDate.clone();
+            this.oldEndDate = this.endDate.clone();
+
+            this.isShowing = false;
+            this.element.trigger('hide.daterangepicker', this);
+        },
+
+        hideNoModelChanges: function (e) {
+            if (!this.isShowing) return;
+
+            $(document)
+                .off('mousedown.daterangepicker')
+                .off('click.daterangepicker', '[data-toggle=dropdown]')
+                .off('focusin.daterangepicker');
+
+            this.element.removeClass('active');
+            this.container.hide();
 
             this.oldStartDate = this.startDate.clone();
             this.oldEndDate = this.endDate.clone();
