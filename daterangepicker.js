@@ -150,7 +150,7 @@
             this.applyClass = 'btn-success';
             this.cancelClass = 'btn-default';
 
-            this.format = 'MM/DD/YYYY';
+            this.format = 'YYYY-MM-DD HH:mm';
             this.separator = ' - ';
 
             this.locale = {
@@ -301,11 +301,11 @@
                     var split = val.split(this.separator);
                     start = end = null;
                     if (split.length == 2) {
-                        start = moment(split[0], this.format);
-                        end = moment(split[1], this.format);
+                        start = moment(split[0], this.format).startOf('day');
+                        end = moment(split[1], this.format).endOf('day');
                     } else if (this.singleDatePicker) {
-                        start = moment(val, this.format);
-                        end = moment(val, this.format);
+                        start = moment(val, this.format).startOf('day');
+                        end = moment(val, this.format).endOf('day');
                     }
                     if (start !== null && end !== null) {
                         this.startDate = start;
@@ -421,7 +421,7 @@
             if (typeof startDate === 'object')
                 this.startDate = moment(startDate);
 
-            if (!this.timePicker)
+            //if (!this.timePicker)
                 this.startDate = this.startDate.startOf('day');
 
             this.oldStartDate = this.startDate.clone();
@@ -438,7 +438,7 @@
             if (typeof endDate === 'object')
                 this.endDate = moment(endDate);
 
-            if (!this.timePicker)
+            //if (!this.timePicker)
                 this.endDate = this.endDate.endOf('day');
 
             this.oldEndDate = this.endDate.clone();
