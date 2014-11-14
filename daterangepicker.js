@@ -126,9 +126,14 @@
 
         constructor: DateRangePicker,
 
-        isStartDateFocussed: function () {
+        isStartDateFocused: function () {
             return this.singleDatePickerFocus && this.singleDatePickerFocus === 'start';
         },
+
+        isEndDateFocused: function () {
+            return this.singleDatePickerFocus && this.singleDatePickerFocus === 'end';
+        },
+
 
         setOptions: function (options, callback) {
 
@@ -276,12 +281,7 @@
 
             if (typeof options.singleDatePicker === 'boolean') {
                 this.singleDatePicker = options.singleDatePicker;
-
-                if (typeof options.singleDatePickerFocus === 'string') {
-                    this.singleDatePickerFocus = options.singleDatePickerFocus;
-                }
-
-                if (this.singleDatePicker && !this.singleDatePickerFocus) {
+                if (this.singleDatePicker) {
                     this.endDate = this.startDate.clone();
                 }
             }
@@ -324,7 +324,7 @@
                     if (split.length == 2) {
                         start = moment(split[0], this.format).startOf('day');
                         end = moment(split[1], this.format).endOf('day');
-                    } else if (this.singleDatePicker && val !== "" && !this.singleDatePickerFocus) {
+                    } else if (this.singleDatePicker && val !== "") {
                         start = moment(val, this.format).startOf('day');
                         end = moment(val, this.format).endOf('day');
                     }
@@ -396,28 +396,17 @@
             }
 
             if (this.singleDatePicker) {
+                this.opens = 'right';
                 this.container.addClass('single');
-
-                if (this.isStartDateFocussed()) {
-                    this.opens = 'right';
-                    this.container.find('.calendar.right').show();
-                    this.container.find('.calendar.left').hide();
-                    if (!this.container.find('.calendar.right').hasClass('single'))
-                        this.container.find('.calendar.right').addClass('single');
-                } else {
-                    this.opens = 'left';
-                    this.container.find('.calendar.right').hide();
-                    this.container.find('.calendar.left').show();
-                    if (!this.container.find('.calendar.left').hasClass('single'))
-                        this.container.find('.calendar.left').addClass('single');
-                }
-
+                this.container.find('.calendar.right').show();
+                this.container.find('.calendar.left').hide();
                 if (!this.timePicker) {
                     this.container.find('.ranges').hide();
                 } else {
                     this.container.find('.ranges .daterangepicker_start_input, .ranges .daterangepicker_end_input').hide();
                 }
-
+                if (!this.container.find('.calendar.right').hasClass('single'))
+                    this.container.find('.calendar.right').addClass('single');
             } else {
                 this.container.removeClass('single');
                 this.container.find('.calendar.right').removeClass('single');
@@ -452,14 +441,8 @@
                 second.removeClass('right').addClass('left');
 
                 if (this.singleDatePicker) {
-                    if (this.isStartDateFocussed) {
-                        first.show();
-                        second.hide();
-                    }
-                    else {
-                        first.hide();
-                        second.show();
-                    }
+                    first.show();
+                    second.hide();
                 }
             }
 
@@ -540,12 +523,7 @@
 
             if (this.singleDatePicker || start === null || end === null) {
                 start = moment(this.element.val(), this.format).zone(this.timeZone);
-                if (this.singleDatePickerFocus) {
-                    end = moment(this.element.val(), this.format).zone(this.timeZone);
-                }
-                else {
-                    end = start;
-                }
+                end = start;
             }
 
             if (end.isBefore(start)) return;
@@ -750,7 +728,7 @@
         },
 
         updateInputText: function () {
-            if (this.element.is('input') && !this.singleDatePicker && !this.singleDatePickerFocus) {
+            if (this.element.is('input') && !this.singleDatePicker) {
                 this.element.val(this.startDate.format(this.format) + this.separator + this.endDate.format(this.format));
             } else if (this.element.is('input')) {
                 this.element.val(this.endDate.format(this.format));
@@ -858,9 +836,9 @@
                 }
             }
 
-            if (this.singleDatePicker && cal.hasClass('left') && !this.singleDatePickerFocus) {
+            if (this.singleDatePicker && cal.hasClass('left')) {
                 endDate = startDate.clone();
-            } else if (this.singleDatePicker && cal.hasClass('right') && !this.singleDatePickerFocus) {
+            } else if (this.singleDatePicker && cal.hasClass('right')) {
                 startDate = endDate.clone();
             }
 
@@ -934,7 +912,7 @@
                 start.second(second);
                 this.startDate = start;
                 this.leftCalendar.month.hour(hour).minute(minute).second(second);
-                if (this.singleDatePicker && !this.singleDatePickerFocus)
+                if (this.singleDatePicker)
                     this.endDate = start.clone();
             } else {
                 var end = this.endDate.clone();
@@ -942,7 +920,7 @@
                 end.minute(minute);
                 end.second(second);
                 this.endDate = end;
-                if (this.singleDatePicker && !this.singleDatePickerFocus)
+                if (this.singleDatePicker)
                     this.startDate = end.clone();
                 this.rightCalendar.month.hour(hour).minute(minute).second(second);
             }
@@ -955,7 +933,7 @@
             this.leftCalendar.calendar = this.buildCalendar(this.leftCalendar.month.month(), this.leftCalendar.month.year(), this.leftCalendar.month.hour(), this.leftCalendar.month.minute(), this.leftCalendar.month.second(), 'left');
             this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), this.rightCalendar.month.second(), 'right');
             this.container.find('.calendar.left').empty().html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'left'));
-            this.container.find('.calendar.right').empty().html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.singleDatePicker && !this.singleDatePickerFocus ? this.minDate : this.startDate, this.maxDate, 'right'));
+            this.container.find('.calendar.right').empty().html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.singleDatePicker ? this.minDate : this.startDate, this.maxDate, 'right'));
 
             this.container.find('.ranges li').removeClass('active');
             var customRange = true;
