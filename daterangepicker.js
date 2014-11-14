@@ -281,6 +281,11 @@
 
             if (typeof options.singleDatePicker === 'boolean') {
                 this.singleDatePicker = options.singleDatePicker;
+
+                if (typeof options.singleDatePickerFocus === 'string') {
+                    this.singleDatePickerFocus = options.singleDatePickerFocus;
+                }
+
                 if (this.singleDatePicker && !this.singleDatePickerFocus) {
                     this.endDate = this.startDate.clone();
                 }
@@ -395,7 +400,33 @@
                 this.endDate = this.endDate.endOf('day');
             }
 
-            if (this.singleDatePicker) {
+            if (this.singleDatePicker && !this.singleDatePickerFocus) {
+                this.opens = 'right';
+                this.container.addClass('single');
+                this.container.find('.calendar.right').show();
+                this.container.find('.calendar.left').hide();
+                if (!this.timePicker) {
+                    this.container.find('.ranges').hide();
+                } else {
+                    this.container.find('.ranges .daterangepicker_start_input, .ranges .daterangepicker_end_input').hide();
+                }
+                if (!this.container.find('.calendar.right').hasClass('single'))
+                    this.container.find('.calendar.right').addClass('single');
+
+            } else if (this.singleDatePicker && this.isStartDateFocused()) {
+                this.opens = 'left';
+                this.container.addClass('single');
+                this.container.find('.calendar.right').hide();
+                this.container.find('.calendar.left').show();
+                if (!this.timePicker) {
+                    this.container.find('.ranges').hide();
+                } else {
+                    this.container.find('.ranges .daterangepicker_start_input, .ranges .daterangepicker_end_input').hide();
+                }
+                if (!this.container.find('.calendar.left').hasClass('single'))
+                    this.container.find('.calendar.left').addClass('single');
+
+            } else if (this.singleDatePicker && this.isEndDateFocused()) {
                 this.opens = 'right';
                 this.container.addClass('single');
                 this.container.find('.calendar.right').show();
@@ -731,7 +762,13 @@
             if (this.element.is('input') && !this.singleDatePicker) {
                 this.element.val(this.startDate.format(this.format) + this.separator + this.endDate.format(this.format));
             } else if (this.element.is('input')) {
-                this.element.val(this.endDate.format(this.format));
+                if (!this.singleDatePickerFocus) {
+                    this.element.val(this.endDate.format(this.format));
+                } else if (this.isStartDateFocused()) {
+                    this.element.val(this.startDate.format(this.format));
+                } else if (this.isEndDateFocused()) {
+                    this.element.val(this.endDate.format(this.format));
+                }
             }
         },
 
@@ -836,10 +873,12 @@
                 }
             }
 
-            if (this.singleDatePicker && cal.hasClass('left')) {
-                endDate = startDate.clone();
-            } else if (this.singleDatePicker && cal.hasClass('right')) {
-                startDate = endDate.clone();
+            if (!this.singleDatePickerFocus) {
+                if (this.singleDatePicker && cal.hasClass('left')) {
+                    endDate = startDate.clone();
+                } else if (this.singleDatePicker && cal.hasClass('right')) {
+                    startDate = endDate.clone();
+                }
             }
 
             cal.find('td').removeClass('active');
@@ -932,6 +971,8 @@
         updateCalendars: function () {
             this.leftCalendar.calendar = this.buildCalendar(this.leftCalendar.month.month(), this.leftCalendar.month.year(), this.leftCalendar.month.hour(), this.leftCalendar.month.minute(), this.leftCalendar.month.second(), 'left');
             this.rightCalendar.calendar = this.buildCalendar(this.rightCalendar.month.month(), this.rightCalendar.month.year(), this.rightCalendar.month.hour(), this.rightCalendar.month.minute(), this.rightCalendar.month.second(), 'right');
+
+
             this.container.find('.calendar.left').empty().html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'left'));
             this.container.find('.calendar.right').empty().html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.singleDatePicker ? this.minDate : this.startDate, this.maxDate, 'right'));
 
