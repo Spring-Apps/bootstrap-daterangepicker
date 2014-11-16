@@ -1,5 +1,5 @@
 /**
- * @version: 1.3.19
+ * @version: 1.3.20
  * @author: Dan Grossman http://www.dangrossman.info/
  * @author: Sheperd Chitete sheperd@wird.co.za
  * @date: 2014-11-12
@@ -46,23 +46,24 @@
         this.isShowing = false;
 
         //create the picker HTML object
-        var DRPTemplate = '<div class="daterangepicker dropdown-menu">' +
-            '<div class="calendar first left"></div>' +
-            '<div class="calendar second right"></div>' +
-            '<div class="ranges">' +
-            '<div class="range_inputs">' +
-            '<div class="daterangepicker_start_input">' +
-            '<label for="daterangepicker_start"></label>' +
-            '<input class="input-mini" type="text" name="daterangepicker_start" value="" />' +
-            '</div>' +
-            '<div class="daterangepicker_end_input">' +
-            '<label for="daterangepicker_end"></label>' +
-            '<input class="input-mini" type="text" name="daterangepicker_end" value="" />' +
-            '</div>' +
-            '<button class="applyBtn" disabled="disabled"></button>&nbsp;' +
-            '<button class="cancelBtn"></button>' +
-            '</div>' +
-            '</div>' +
+        var DRPTemplate =
+            '<div class="daterangepicker dropdown-menu">' +
+            '   <div class="calendar first left"></div>' +
+            '   <div class="calendar second right"></div>' +
+            '   <div class="ranges">' +
+            '       <div class="range_inputs">' +
+            '           <div class="daterangepicker_start_input">' +
+            '               <label for="daterangepicker_start"></label>' +
+            '               <input class="input-mini" type="text" name="daterangepicker_start" value="" />' +
+            '           </div>' +
+            '           <div class="daterangepicker_end_input">' +
+            '               <label for="daterangepicker_end"></label>' +
+            '               <input class="input-mini" type="text" name="daterangepicker_end" value="" />' +
+            '           </div>' +
+            '           <button class="applyBtn" disabled="disabled"></button>&nbsp;' +
+            '           <button class="cancelBtn"></button>' +
+            '       </div>' +
+            '   </div>' +
             '</div>';
 
         //custom options
@@ -330,8 +331,14 @@
                         start = moment(split[0], this.format).startOf('day');
                         end = moment(split[1], this.format).endOf('day');
                     } else if (this.singleDatePicker && val !== "") {
-                        start = moment(val, this.format).startOf('day');
-                        end = moment(val, this.format).endOf('day');
+                        if (this.isStartDateFocused()) {
+                            start = moment(val, this.format).startOf('day');
+                        } else if (this.isEndDateFocused()) {
+                            end = moment(val, this.format).endOf('day');
+                        } else {
+                            start = moment(val, this.format).startOf('day');
+                            end = moment(val, this.format).endOf('day');
+                        }
                     }
                     if (start !== null && end !== null) {
                         this.startDate = start;
@@ -458,7 +465,7 @@
                 calendar: []
             };
 
-            if (this.opens == 'right' || this.opens == 'center') {
+            if ((this.opens == 'right' || this.opens == 'center') && !this.singleDatePickerFocus) {
                 //swap calendar positions
                 var first = this.container.find('.calendar.first');
                 var second = this.container.find('.calendar.second');
@@ -472,8 +479,16 @@
                 second.removeClass('right').addClass('left');
 
                 if (this.singleDatePicker) {
-                    first.show();
-                    second.hide();
+                    if (this.isStartDateFocused()) {
+                        first.show();
+                        second.hide();
+                    } else if (this.isEndDateFocused()) {
+                        first.hide();
+                        second.show();
+                    } else {
+                        first.show();
+                        second.hide();
+                    }
                 }
             }
 
@@ -925,6 +940,8 @@
 
         updateTime: function (e) {
 
+            if (!this.timePicker) return;
+
             var cal = $(e.target).closest('.calendar'),
                 isLeft = cal.hasClass('left');
 
@@ -974,7 +991,7 @@
 
 
             this.container.find('.calendar.left').empty().html(this.renderCalendar(this.leftCalendar.calendar, this.startDate, this.minDate, this.maxDate, 'left'));
-            this.container.find('.calendar.right').empty().html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, this.singleDatePicker ? this.minDate : this.startDate, this.maxDate, 'right'));
+            this.container.find('.calendar.right').empty().html(this.renderCalendar(this.rightCalendar.calendar, this.endDate, (this.singleDatePicker && !this.singleDatePickerFocus) ? this.minDate : this.startDate, this.maxDate, 'right'));
 
             this.container.find('.ranges li').removeClass('active');
             var customRange = true;
