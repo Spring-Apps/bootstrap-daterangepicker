@@ -568,8 +568,16 @@
             }
 
             if (this.singleDatePicker || start === null || end === null) {
-                start = moment(this.element.val(), this.format).zone(this.timeZone);
-                end = start;
+                if (this.isStartDateFocused) {
+                    start = moment(this.element.val(), this.format).zone(this.timeZone);
+                    end = this.endDate;
+                } else if (this.isEndDateFocused) {
+                    start = this.startDate;
+                    end = moment(this.element.val(), this.format).zone(this.timeZone);
+                } else {
+                    start = moment(this.element.val(), this.format).zone(this.timeZone);
+                    end = start.clone();
+                }
             }
 
             if (end.isBefore(start)) return;
@@ -577,8 +585,8 @@
             this.oldStartDate = this.startDate.clone();
             this.oldEndDate = this.endDate.clone();
 
-            this.startDate = start;
-            this.endDate = end;
+            this.startDate = start.startOf('day');
+            this.endDate = end.endOf('day');
 
             if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
                 this.notify();
@@ -758,9 +766,9 @@
             var startDate, endDate;
             if (el.attr('name') === 'daterangepicker_start') {
                 startDate = date;
-                endDate = this.endDate;
+                endDate = this.endDate.endOf('day');
             } else {
-                startDate = this.startDate;
+                startDate = this.startDate.startOf('day');
                 endDate = date;
             }
             this.setCustomDates(startDate, endDate);
@@ -1326,7 +1334,6 @@
         },
 
         remove: function () {
-
             this.container.remove();
             this.element.off('.daterangepicker');
             this.element.removeData('daterangepicker');
